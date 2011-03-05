@@ -1,0 +1,93 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{38C91C3A-E2E6-4FC7-B461-4659A4F92240}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DTS.Common.GIS</RootNamespace>
+    <AssemblyName>DTS.Common.GIS</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>DTS.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\DTS.Common.GIS.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Jayrock, Version=0.9.8316.0, Culture=neutral, PublicKeyToken=9586cafbf777a8f5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DTS.Common\lib\Jayrock.dll</HintPath>
+    </Reference>
+    <Reference Include="Jayrock.Json, Version=0.9.8316.0, Culture=neutral, PublicKeyToken=9586cafbf777a8f5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DTS.Common\lib\Jayrock.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NetTopologySuite, Version=1.7.1.29911, Culture=neutral, PublicKeyToken=f580a05016ebada1, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GeoJSONReader.cs" />
+    <Compile Include="GeoJSONWriter.cs" />
+    <Compile Include="GeometryCollectionFeature.cs" />
+    <Compile Include="GISFeature.cs" />
+    <Compile Include="GISPointFeature.cs" />
+    <Compile Include="GISPolygonFeature.cs" />
+    <Compile Include="GISLineStringFeature.cs" />
+    <Compile Include="GISSerializableDictionary.cs" />
+    <Compile Include="IGISAttributes.cs" />
+    <Compile Include="IGISEditableLayer.cs" />
+    <Compile Include="IGISFeature.cs" />
+    <Compile Include="IGISJSONSerializable.cs" />
+    <Compile Include="IGISLayer.cs" />
+    <Compile Include="IGISXMLSerializable.cs" />
+    <Compile Include="InMemoryGISFeature.cs" />
+    <Compile Include="InMemoryGISLayer.cs" />
+    <Compile Include="InMemoryGISLinearRingFeature.cs" />
+    <Compile Include="InMemoryGISMultiPolygonFeature.cs" />
+    <Compile Include="InMemoryGISMultiPolygonLayer.cs" />
+    <Compile Include="InMemoryGISPointFeature.cs" />
+    <Compile Include="InMemoryGISPointLayer.cs" />
+    <Compile Include="InMemoryGISPolygonFeature.cs" />
+    <Compile Include="InMemoryGISLineStringFeature.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\NetTopologySuite.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DTS.Common\DTS.Common.csproj">
+      <Project>{6DC55313-5C83-45FB-A389-1DFE93A9D9C6}</Project>
+      <Name>DTS.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DTS.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

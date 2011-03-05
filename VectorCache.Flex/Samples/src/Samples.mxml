@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+//////////////////////////////////////////////////////////////////////////////////////
+//
+//    Copyright (c) 2011 DTSAgile
+//    
+//    Permission is hereby granted, free of charge, to any person obtaining a copy
+//    of this software and associated documentation files (the "Software"), to deal
+//    in the Software without restriction, including without limitation the rights
+//    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//    copies of the Software, and to permit persons to whom the Software is
+//    furnished to do so, subject to the following conditions:
+//    The above copyright notice and this permission notice shall be included in
+//    all copies or substantial portions of the Software.
+//    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//    THE SOFTWARE.
+//
+//////////////////////////////////////////////////////////////////////////////////////
+-->
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:esri="http://www.esri.com/2008/ags"
+			   xmlns:samples="com.esri.ags.samples.*"
+			   pageTitle="DTSAgile Vector Tile Layer Sample" 
+			   xmlns:layers="com.dtsagile.ags.layers.*" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:renderers="com.dtsagile.ags.renderers.*" 
+			   xmlns:ags="com.dtsagile.ags.*">
+	<!--
+	@@includeFiles com/dtsagile/ags/layers/VectorTileMapServiceLayer.as
+	
+	-->
+	<fx:Script>
+		<![CDATA[
+			import com.dtsagile.ags.utils.ColorUtil;
+			import com.esri.ags.Graphic;
+			import com.esri.ags.SpatialReference;
+			import com.esri.ags.events.ExtentEvent;
+			import com.esri.ags.geometry.Extent;
+			import com.esri.ags.geometry.MapPoint;
+			import com.esri.ags.layers.supportClasses.LOD;
+			import com.esri.ags.renderers.UniqueValueRenderer;
+			import com.esri.ags.renderers.supportClasses.UniqueValueInfo;
+			import com.esri.ags.symbols.SimpleFillSymbol;
+			import com.esri.ags.utils.WebMercatorUtil;
+			import com.esri.components.PanelToolTip;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.ToolTipEvent;
+			
+			// when mouse (cursor) is on the map ...
+			private function loadHandler():void
+			{
+				map.useHandCursor = false;
+				map.addEventListener(MouseEvent.MOUSE_MOVE, mouseMoveHandler);
+			}
+			
+			// ... show coordinates of current (mouse) location
+			private function mouseMoveHandler(event:MouseEvent):void
+			{
+				const mapPoint:MapPoint = map.toMapFromStage(event.stageX, event.stageY);
+				const latlong:MapPoint = WebMercatorUtil.webMercatorToGeographic(mapPoint) as MapPoint;
+				mousecoords.text =
+					"x,y is " + mapPoint.x.toFixed(0) + "," + mapPoint.y.toFixed(0)
+					+ " and Lat/Long is: " + latlong.y.toFixed(6)
+					+ " / " + latlong.x.toFixed(6);
+			}
+			
+			// convert current projected extent to geographic and show as such
+			protected function showExtentInGeographic(extent:Extent):String
+			{
+				const geoExtent:Extent = WebMercatorUtil.webMercatorToGeographic(map.extent) as Extent;
+				// return geoExtent.toString() + ".." ;
+				return " " + geoExtent.xmin.toFixed(6)
+					+ ", " + geoExtent.ymin.toFixed(6)
+					+ ", " + geoExtent.xmax.toFixed(6)
+					+ ", " + geoExtent.ymax.toFixed(6)
+					+ "   (wkid: " + geoExtent.spatialReference.wkid + ")";
+			}
+
+			// ------------------------------------------------
+			//
+			// Sample VectorTiledMapServiceLayer label functions
+			//
+			// ------------------------------------------------
+
+			protected function coCitiesAndTownsLabelFunction(item:Object):void
+			{
+				var g:Graphic = item as Graphic;
+				/* You must create a blank ToolTip so that the control can dispatch ToolTip-related events.
+				The new ToolTip will replace this empty ToolTip. */
+				g.toolTip = " ";
+				g.addEventListener(ToolTipEvent.TOOL_TIP_CREATE, cityToolTipCreateHandler, false, 0, true);
+			}
+			
+			protected function countiesLabelFunction(item:Object):void
+			{
+				var g:Graphic = item as Graphic;
+				g.toolTip = 
+					"OID: " + g.attributes.OBJECTID + ", " 
+					+ g.attributes.NAME + " County, "
+					+ g.attributes.STATE_NAME
+			}
+			
+			protected function usstatesLabelFunction(item:Object):void
+			{
+				var g:Graphic = item as Graphic;
+				g.toolTip = 
+					"OID: " + g.attributes.OBJECTID + ", " 
+					+ g.attributes.STATE_NAME
+			}
+			
+			private var _cityTooltip:PanelToolTip = new PanelToolTip();
+			protected function cityToolTipCreateHandler(event:ToolTipEvent):void
+			{
+				var g:Graphic = event.target as Graphic;
+				_cityTooltip.title = g.attributes.NAME + ", CO";
+				_cityTooltip.population = g.attributes.POP00;
+				
+				event.toolTip = _cityTooltip;
+			}
+
+
+			protected function map_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.map.extent = new Extent(-12597000, 4270000, -10864000, 5128000, new SpatialReference(102100));
+			}
+
+			private function dtslogoClickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest('http://dtsgis.com/'));
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<esri:SimpleLineSymbol id="highwaysSymbol" alpha="0.8" width="2" style="solid" color="0xFF0000"/>
+		<renderers:RandomColorRenderer id="fillRandomColorRenderer" attribute="STATE_NAME"/>
+		<renderers:ColorRampRenderer id="fillColorRampRenderer" attribute="STATE_NAME" fromColor="0xFFFFFF" toColor="0x0000CC" numSteps="51" />
+		<renderers:RandomColorRenderer id="lineRandomColorRenderer" attribute="LABEL"/>
+		<renderers:RandomColorRenderer id="markerRandomColorRenderer" />
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout gap="6"/>
+	</s:layout>
+	
+	<s:controlBarLayout>
+		<s:VerticalLayout horizontalAlign="left"
+						  verticalAlign="top"
+						  paddingBottom="7"
+						  paddingTop="7"
+						  paddingLeft="15"
+						  gap="10"/>
+	</s:controlBarLayout>
+	<s:controlBarContent>
+		<s:HGroup width="100%" paddingRight="25">
+			<s:CheckBox id="chkMapInfo" selected="false" label="Show map level / extent / mouse coordinates" />
+			<s:VGroup horizontalAlign="center" width="100%">
+				<s:Label fontFamily="Tahoma"
+						 fontSize="14"
+						 fontWeight="bold"
+						 text="By extending TileMapServiceLayer, this application can access vector tiles from a cache."/>
+				<s:HGroup gap="50" horizontalAlign="center" width="100%">
+					<s:RadioButton id="layerToggler0" selected="false" label="Colorado Cities and Towns" groupName="layers" />
+					<s:RadioButton id="layerToggler1" selected="false" label="Colorado Highways" groupName="layers" />
+					<s:RadioButton id="layerToggler2" selected="false" label="Counties" groupName="layers" />
+					<s:RadioButton id="layerToggler3" selected="false" label="States" groupName="layers" />
+				</s:HGroup>
+			</s:VGroup>
+			<mx:Image source="assets/images/dtsagile_logo.png" height="40" width="40" smoothBitmapContent="true"
+					  useHandCursor="true" buttonMode="true"
+					  toolTip="DTSGIS"
+					  click="dtslogoClickHandler(event)"/>
+		</s:HGroup>
+	</s:controlBarContent>
+	
+	<s:VGroup width="100%" paddingLeft="7" paddingTop="7" paddingBottom="7" visible="{chkMapInfo.selected}" includeInLayout="{chkMapInfo.selected}">
+		<s:HGroup>
+			<s:Label fontWeight="bold" text="Current map extent:"/>
+			<s:RichEditableText editable="false" text='xmin="{map.extent.xmin.toFixed(0)}" ymin="{map.extent.ymin.toFixed(0)}" xmax="{map.extent.xmax.toFixed(0)}" ymax="{map.extent.ymax.toFixed(0)}"   (wkid="{map.spatialReference.wkid}")'/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label fontWeight="bold" text="Current map extent (in geographic):"/>
+			<s:RichEditableText editable="false" text="{showExtentInGeographic(map.extent)}"/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label fontWeight="bold" text="Current Mouse Coordinates:"/>
+			<s:RichEditableText id="mousecoords"
+								editable="false"
+								text="Move the mouse over the map to see its current coordinates..."/>
+		</s:HGroup>
+		<s:HGroup>
+			<s:Label fontWeight="bold" text="Current map scale is"/>
+			<s:RichEditableText editable="false" text="1:{map.scale.toFixed(0)} (level {map.level})"/>
+		</s:HGroup>
+	</s:VGroup>
+
+		
+	<!-- Initial extent to Colorado -->
+	<ags:DTSMap id="map" load="loadHandler()" creationComplete="map_creationCompleteHandler(event)">
+		<esri:ArcGISTiledMapServiceLayer id="streets"
+										 alpha="1.0" 
+										 url="http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"/>
+		<!--
+		points 		- 	ZipPoints (0)
+		polylines 	-	Waterlines 100k (1)
+		polygons 	- 	Waterbodies 100k (2)
+						States (3)
+						Counties (4)
+		-->
+		<layers:VectorTiledMapServiceLayer id="CoCitiesAndTowns"
+											alpha="0.8"
+											url="http://ags2.dtsagile.com/ArcGIS/rest/services/arcstache/samples/MapServer"
+											layerId="0"
+											visible="{layerToggler0.selected}"
+											labelFunction="coCitiesAndTownsLabelFunction"
+											renderer="{markerRandomColorRenderer}"/>
+		
+		<layers:VectorTiledMapServiceLayer id="CoHighways"
+											alpha="0.8"
+											url="http://ags2.dtsagile.com/ArcGIS/rest/services/arcstache/samples/MapServer"
+											layerId="1"
+											visible="{layerToggler1.selected}"
+											labelField="LABEL"
+											symbol="{highwaysSymbol}"/>
+		
+		<layers:VectorTiledMapServiceLayer id="Counties"
+											alpha="0.8"
+											url="http://ags2.dtsagile.com/ArcGIS/rest/services/arcstache/samples/MapServer"
+											layerId="3"
+											visible="{layerToggler2.selected}"
+											labelField="NAME"
+											labelFunction="countiesLabelFunction"
+											renderer="{fillColorRampRenderer}"/>
+		
+		<layers:VectorTiledMapServiceLayer id="UsStates"
+											alpha="0.8"
+											url="http://ags2.dtsagile.com/ArcGIS/rest/services/arcstache/samples/MapServer"
+											layerId="2"
+											visible="{layerToggler3.selected}"
+											labelFunction="usstatesLabelFunction"
+											renderer="{fillRandomColorRenderer}"/>
+	</ags:DTSMap>
+		
+</s:Application>

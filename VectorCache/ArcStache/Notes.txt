@@ -1,0 +1,18 @@
+﻿Core Ideas:
+- take a layer/Z/R/C request (check tilestache)
+- optional &f=esri if we are asking for Esri Geometry
+- if .json file exists on disk, if not
+	- convert Z,R,C into a bounding box
+	- query layer for...
+		- points inside the box
+		- lines that intersect the box
+		- polys who's centroids insersect the box
+	- generalize as needed (based on  Z)
+	- cache file in both formats
+	- stream back requested format
+else
+	- stream back requested format
+
+
+Tasks:
+- get natural earth data so we have global coverage (easier for testing)
